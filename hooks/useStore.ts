@@ -39,14 +39,32 @@ export function useStore() {
 
   useEffect(() => { load(); }, [load]);
 
-  // Categories
+  // Helper: get current user id
+  const getUserId = async (): Promise<string | null> => {
+    const { data: { user } } = await supabase.auth.getUser();
+    return user?.id ?? null;
+  };
+
+  // ── Categories ───────────────────────────────────────────
   const saveCategory = async (cat: Category) => {
-    const { data: existing } = await supabase.from("categories").select("id").eq("id", cat.id).single();
+    const uid = await getUserId();
+    if (!uid) return;
+
+    const { data: existing } = await supabase
+      .from("categories").select("id").eq("id", cat.id).maybeSingle();
+
     if (existing) {
-      await supabase.from("categories").update({ name: cat.name, emoji: cat.emoji }).eq("id", cat.id);
+      await supabase.from("categories")
+        .update({ name: cat.name, emoji: cat.emoji })
+        .eq("id", cat.id);
     } else {
-      const maxOrder = categories.length;
-      await supabase.from("categories").insert({ id: cat.id, name: cat.name, emoji: cat.emoji, sort_order: maxOrder });
+      await supabase.from("categories").insert({
+        id: cat.id,
+        user_id: uid,
+        name: cat.name,
+        emoji: cat.emoji,
+        sort_order: categories.length,
+      });
     }
     await load();
   };
@@ -58,24 +76,36 @@ export function useStore() {
   };
 
   const reorderCategories = async (reordered: Category[]) => {
-    setCategories(reordered); // optimistic
+    setCategories(reordered); // optimistic update
     await Promise.all(
-      reordered.map((c, i) => supabase.from("categories").update({ sort_order: i }).eq("id", c.id))
+      reordered.map((c, i) =>
+        supabase.from("categories").update({ sort_order: i }).eq("id", c.id)
+      )
     );
   };
 
-  // Products
+  // ── Products ─────────────────────────────────────────────
   const saveProduct = async (p: Product) => {
+    const uid = await getUserId();
+    if (!uid) return;
+
+    const { data: existing } = await supabase
+      .from("products").select("id").eq("id", p.id).maybeSingle();
+
     const payload = {
-      id: p.id, name: p.name, emoji: p.emoji,
-      price: p.price, cogs: p.cogs, stock: p.stock,
-      reorder_qty: p.reorderQty, category_id: p.categoryId,
+      name: p.name,
+      emoji: p.emoji,
+      price: p.price,
+      cogs: p.cogs,
+      stock: p.stock,
+      reorder_qty: p.reorderQty,
+      category_id: p.categoryId,
     };
-    const { data: existing } = await supabase.from("products").select("id").eq("id", p.id).single();
+
     if (existing) {
       await supabase.from("products").update(payload).eq("id", p.id);
     } else {
-      await supabase.from("products").insert(payload);
+      await supabase.from("products").insert({ ...payload, id: p.id, user_id: uid });
     }
     await load();
   };
@@ -85,38 +115,52 @@ export function useStore() {
     await load();
   };
 
-  // Transactions
+  // ── Transactions ─────────────────────────────────────────
   const saveTransaction = async (txn: Transaction) => {
-    const { data, error } = await supabase.from("transactions").insert({
+    const uid = await getUserId();
+    if (!uid) return;
+
+    await supabase.from("transactions").insert({
       id: txn.id,
+      user_id: uid,
       total: txn.total,
       amount_paid: txn.amountPaid,
       change: txn.change,
-    }).select().single();
-    if (error || !data) return;
+    });
 
-    await supabase.from("transaction_items").insert(
-      txn.items.map((item) => ({
-        transaction_id: txn.id,
-        product_id: item.product.id,
-        product_name: item.product.name,
-        product_emoji: item.product.emoji,
-        price: item.product.price,
-        qty: item.qty,
-        subtotal: item.product.price * item.qty,
-      }))
-    );
+    if (txn.items.length > 0) {
+      await supabase.from("transaction_items").insert(
+        txn.items.map((item) => ({
+          transaction_id: txn.id,
+          product_id: item.product.id,
+          product_name: item.product.name,
+          product_emoji: item.product.emoji,
+          price: item.product.price,
+          qty: item.qty,
+          subtotal: item.product.price * item.qty,
+        }))
+      );
+    }
 
-    // Decrement stock for each item sold
+    // Decrement stock
     await Promise.all(
       txn.items.map(async (item) => {
         try {
-          await supabase.rpc("decrement_stock", { product_id: item.product.id, qty: item.qty });
+          await supabase.rpc("decrement_stock", {
+            product_id: item.product.id,
+            qty: item.qty,
+          });
         } catch { /* ignore */ }
       })
     );
+
     await load();
   };
 
-  return { categories, products, loading, saveCategory, removeCategory, reorderCategories, saveProduct, removeProduct, saveTransaction };
+  return {
+    categories, products, loading,
+    saveCategory, removeCategory, reorderCategories,
+    saveProduct, removeProduct,
+    saveTransaction,
+  };
 }
