@@ -9,7 +9,19 @@ interface Props {
   onClose: () => void;
 }
 
-const COMMON_EMOJIS = ["🥤","🍞","🍚","🍬","🧴","🥚","🥫","🧹","🥦","🍎","🥕","🧅","🍗","🧀","🥩","🌿","🌾","🧃","🍦","🍰","🎂","🍕","🔧","📦","🛒"];
+const EMOJI_GROUPS = [
+  { label: "Drinks",      emojis: ["🥤","💧","🍵","🥛","🍫","🧃","🍺","🧋"] },
+  { label: "Food",        emojis: ["🍞","🍚","🥖","🫓","🍜","🍗","🥩","🐟","🥚","🧀","🍕","🥕","🥦","🧅","🍎"] },
+  { label: "Snacks",      emojis: ["🍬","🍿","🍖","🥔","🍤","🍦","🍰","🎂","🍫","🍭"] },
+  { label: "Hygiene",     emojis: ["🧴","🧼","🪥","🧻","🪒","💄","🧽"] },
+  { label: "Cleaning",    emojis: ["🧹","🧺","🪣","🫧","🪠"] },
+  { label: "Canned",      emojis: ["🥫","🫙","🐟","🥩","🍅"] },
+  { label: "Smoke",       emojis: ["🚬","🪔","💨","🔥"] },
+  { label: "Ice",         emojis: ["🧊","❄️","🥶","🍧"] },
+  { label: "OTC / Meds",  emojis: ["💊","🩺","🧪","💉","🩹","🏥"] },
+  { label: "Condiments",  emojis: ["🧂","🫙","🍯","🫒","🌶️","🧄","🍶"] },
+  { label: "Others",      emojis: ["📦","🛒","❓","🔧","🪙","📋","🎁","🪝"] },
+];
 
 export default function CategoryFormModal({ category, onSave, onClose }: Props) {
   const [name, setName] = useState("");
@@ -41,7 +53,7 @@ export default function CategoryFormModal({ category, onSave, onClose }: Props) 
 
         <div className="p-6 space-y-4">
           <div>
-            <p className="text-sm font-semibold text-gray-600 mb-2">Icon</p>
+            <p className="text-sm font-semibold text-gray-900 mb-2">Icon</p>
             <button
               onClick={() => setShowEmojiPicker((v) => !v)}
               className="text-4xl w-16 h-16 rounded-2xl bg-gray-50 border-2 border-gray-200 hover:border-emerald-400 flex items-center justify-center transition-all"
@@ -49,22 +61,29 @@ export default function CategoryFormModal({ category, onSave, onClose }: Props) 
               {emoji}
             </button>
             {showEmojiPicker && (
-              <div className="mt-2 p-3 bg-gray-50 rounded-2xl flex flex-wrap gap-2 max-h-28 overflow-y-auto border border-gray-200">
-                {COMMON_EMOJIS.map((e) => (
-                  <button
-                    key={e}
-                    onClick={() => { setEmoji(e); setShowEmojiPicker(false); }}
-                    className="text-2xl w-10 h-10 rounded-xl hover:bg-emerald-100 active:scale-90 transition-all"
-                  >
-                    {e}
-                  </button>
+              <div className="mt-2 bg-gray-50 rounded-2xl border border-gray-200 max-h-48 overflow-y-auto">
+                {EMOJI_GROUPS.map((group) => (
+                  <div key={group.label} className="px-3 pt-3">
+                    <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-1">{group.label}</p>
+                    <div className="flex flex-wrap gap-1 pb-2 border-b border-gray-100 last:border-0">
+                      {group.emojis.map((e) => (
+                        <button
+                          key={group.label + e}
+                          onClick={() => { setEmoji(e); setShowEmojiPicker(false); }}
+                          className="text-2xl w-10 h-10 rounded-xl hover:bg-emerald-100 active:scale-90 transition-all"
+                        >
+                          {e}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 ))}
               </div>
             )}
           </div>
 
           <div>
-            <label className="text-sm font-semibold text-gray-600 block mb-1">Category Name</label>
+            <label className="text-sm font-semibold text-gray-900 block mb-1">Category Name</label>
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
