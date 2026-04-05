@@ -1,8 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Transaction } from "@/types";
-import { getTransactions } from "@/lib/store";
+import { Transaction, CartItem } from "@/types";
+import { createClient } from "@/lib/supabase";
 
 type Filter = "today" | "week" | "month" | "all";
 
@@ -37,11 +37,36 @@ export default function TransactionsPage() {
   const [expanded, setExpanded] = useState<string | null>(null);
 
   useEffect(() => {
-    setAll(getTransactions());
+    const supabase = createClient();
+    supabase
+      .from("transactions")
+      .select("*, transaction_items(*)")
+      .order("created_at", { ascending: false })
+      .then(({ data }) => {
+        if (!data) return;
+        setAll(data.map((row) => ({
+          id: row.id,
+          total: Number(row.total),
+          amountPaid: Number(row.amount_paid),
+          change: Number(row.change),
+          timestamp: row.created_at,
+          items: (row.transaction_items ?? []).map((ti: Record<string, unknown>) => ({
+            product: {
+              id: ti.product_id as string ?? "",
+              name: ti.product_name as string,
+              emoji: ti.product_emoji as string,
+              price: Number(ti.price),
+              cogs: 0, stock: 0, reorderQty: 0,
+              categoryId: "",
+            },
+            qty: Number(ti.qty),
+          } as CartItem)),
+        })));
+      });
   }, []);
 
   const cutoff = startOf(filter);
-  const filtered = all.filter((t) => new Date(t.timestamp) >= cutoff);
+  const filtered = all.filter((t) => new Date(t.timestamp ?? t.timestamp) >= cutoff);
 
   const totalSales = filtered.reduce((s, t) => s + t.total, 0);
 

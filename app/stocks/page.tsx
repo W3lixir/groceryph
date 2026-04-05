@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Product } from "@/types";
-import { getProducts, getCategories, upsertProduct } from "@/lib/store";
+import { createClient } from "@/lib/supabase";
 import { getStockStatus, STOCK_BADGE } from "@/lib/stockStatus";
 
 type Filter = "all-alerts" | "out" | "low";
@@ -14,9 +14,19 @@ export default function StocksPage() {
   const [restockId, setRestockId] = useState<string | null>(null);
   const [restockQty, setRestockQty] = useState("");
 
-  const reload = () => {
-    setProducts(getProducts());
-    setCategories(getCategories());
+  const reload = async () => {
+    const supabase = createClient();
+    const [prodsRes, catsRes] = await Promise.all([
+      supabase.from("products").select("*"),
+      supabase.from("categories").select("*"),
+    ]);
+    setCategories((catsRes.data ?? []).map((r) => ({ id: r.id, name: r.name, emoji: r.emoji })));
+    setProducts((prodsRes.data ?? []).map((r) => ({
+      id: r.id, name: r.name, emoji: r.emoji,
+      price: Number(r.price), cogs: Number(r.cogs ?? 0),
+      stock: Number(r.stock ?? 0), reorderQty: Number(r.reorder_qty ?? 5),
+      categoryId: r.category_id,
+    })));
   };
 
   useEffect(() => { reload(); }, []);
@@ -36,13 +46,14 @@ export default function StocksPage() {
   const outCount = products.filter((p) => getStockStatus(p) === "out").length;
   const lowCount = products.filter((p) => getStockStatus(p) === "low").length;
 
-  const handleRestock = (product: Product) => {
+  const handleRestock = async (product: Product) => {
     const qty = parseInt(restockQty);
     if (!qty || qty <= 0) return;
-    upsertProduct({ ...product, stock: (product.stock ?? 0) + qty });
+    const supabase = createClient();
+    await supabase.from("products").update({ stock: (product.stock ?? 0) + qty }).eq("id", product.id);
     setRestockId(null);
     setRestockQty("");
-    reload();
+    await reload();
   };
 
   const FILTERS: { key: Filter; label: string; count: number }[] = [

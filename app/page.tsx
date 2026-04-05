@@ -2,16 +2,20 @@
 import { useState, useCallback } from "react";
 import { useStore } from "@/hooks/useStore";
 import { CartItem, Category, Product } from "@/types";
-import { addTransaction, generateId } from "@/lib/store";
+import { generateId } from "@/lib/store";
 import { getStockStatus } from "@/lib/stockStatus";
+import { createClient } from "@/lib/supabase";
 import CategoryGrid from "@/components/CategoryGrid";
 import ProductPopup from "@/components/ProductPopup";
 import Cart from "@/components/Cart";
 import CheckoutModal from "@/components/CheckoutModal";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function POSPage() {
-  const { categories, products } = useStore();
+  const { categories, products, saveTransaction } = useStore();
+  const router = useRouter();
+  const supabase = createClient();
   const alertCount = products.filter((p) => getStockStatus(p) !== "ok").length;
   const [activeCategory, setActiveCategory] = useState<Category | null>(null);
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -64,9 +68,9 @@ export default function POSPage() {
     setCart([]);
   };
 
-  const handleCheckout = (amountPaid: number) => {
+  const handleCheckout = async (amountPaid: number) => {
     const total = cart.reduce((s, i) => s + i.product.price * i.qty, 0);
-    addTransaction({
+    await saveTransaction({
       id: generateId(),
       items: cart,
       total,
@@ -126,6 +130,12 @@ export default function POSPage() {
           >
             📦 Inventory
           </Link>
+          <button
+            onClick={async () => { await supabase.auth.signOut(); router.push("/login"); }}
+            className="flex items-center gap-2 bg-gray-100 hover:bg-red-50 hover:text-red-500 text-gray-500 font-semibold text-sm px-4 py-2 rounded-xl transition-all active:scale-95"
+          >
+            🚪 Logout
+          </button>
         </div>
       </header>
 

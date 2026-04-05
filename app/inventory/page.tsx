@@ -8,14 +8,13 @@ import {
 import { SortableContext, verticalListSortingStrategy, arrayMove } from "@dnd-kit/sortable";
 import { useStore } from "@/hooks/useStore";
 import { Category, Product } from "@/types";
-import { saveCategories } from "@/lib/store";
 import { getStockStatus } from "@/lib/stockStatus";
 import ProductFormModal from "@/components/ProductFormModal";
 import CategoryFormModal from "@/components/CategoryFormModal";
 import SortableCategoryItem from "@/components/SortableCategoryItem";
 
 export default function InventoryPage() {
-  const { categories, products, saveProduct, removeProduct, saveCategory, removeCategory } = useStore();
+  const { categories, products, saveProduct, removeProduct, saveCategory, removeCategory, reorderCategories } = useStore();
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -28,9 +27,7 @@ export default function InventoryPage() {
     const oldIndex = categories.findIndex((c) => c.id === active.id);
     const newIndex = categories.findIndex((c) => c.id === over.id);
     const reordered = arrayMove(categories, oldIndex, newIndex);
-    saveCategories(reordered);
-    // force re-read by triggering a save on the first item (triggers useStore refresh)
-    window.dispatchEvent(new Event("gpos-categories-updated"));
+    reorderCategories(reordered);
   }
 
   const [activeCategoryId, setActiveCategoryId] = useState<string>("all");
