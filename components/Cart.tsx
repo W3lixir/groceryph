@@ -14,7 +14,7 @@ export default function Cart({ items, onRemoveOne, onUndo, onClear, onCheckout }
   const itemCount = items.reduce((sum, item) => sum + item.qty, 0);
 
   return (
-    <div className="flex flex-col h-full bg-white rounded-2xl shadow-lg overflow-hidden">
+    <div className="flex flex-col h-full min-h-0 bg-white rounded-2xl shadow-lg overflow-hidden">
       {/* Header */}
       <div className="bg-emerald-500 text-white px-5 py-4">
         <h2 className="text-lg font-bold">Current Transaction</h2>

@@ -86,7 +86,7 @@ export default function POSPage() {
   const dateStr = now.toLocaleDateString("en-PH", { weekday: "short", month: "short", day: "numeric", year: "numeric" });
 
   return (
-    <div className="h-screen bg-gray-100 flex flex-col overflow-hidden">
+    <div className="h-dvh bg-gray-100 flex flex-col overflow-hidden">
       {/* Top Bar */}
       <header className="bg-white shadow-sm px-6 py-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -136,9 +136,9 @@ export default function POSPage() {
       )}
 
       {/* Main Content */}
-      <div className="flex flex-1 overflow-hidden gap-4 p-4">
+      <div className="flex flex-1 min-h-0 gap-4 p-4">
         {/* Left: Categories */}
-        <div className="w-1/2 bg-gray-100 rounded-2xl overflow-y-auto">
+        <div className="w-1/2 min-h-0 bg-gray-100 rounded-2xl overflow-y-auto">
           <div className="px-4 pt-4 pb-1">
             <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide">Categories</h2>
           </div>
@@ -150,7 +150,7 @@ export default function POSPage() {
         </div>
 
         {/* Right: Cart */}
-        <div className="w-1/2">
+        <div className="w-1/2 min-h-0 h-full">
           <Cart
             items={cart}
             onRemoveOne={removeOne}

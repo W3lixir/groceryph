@@ -23,4 +23,20 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  overscroll-behavior: none;
+}
+
+/* Smooth touch scrolling on all scrollable areas */
+* {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Prevent double-tap zoom on buttons/links */
+button, a {
+  touch-action: manipulation;
+}
+
+/* Remove dark mode overrides — keep light for POS */
+@media (prefers-color-scheme: dark) {
+  html { color-scheme: light; }
 }

@@ -53,7 +53,7 @@ export default function TransactionsPage() {
   ];
 
   return (
-    <div className="h-screen bg-gray-100 flex flex-col overflow-hidden">
+    <div className="h-dvh bg-gray-100 flex flex-col overflow-hidden">
       {/* Header */}
       <header className="bg-white shadow-sm px-6 py-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
