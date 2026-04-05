@@ -9,6 +9,7 @@ import { SortableContext, verticalListSortingStrategy, arrayMove } from "@dnd-ki
 import { useStore } from "@/hooks/useStore";
 import { Category, Product } from "@/types";
 import { saveCategories } from "@/lib/store";
+import { getStockStatus } from "@/lib/stockStatus";
 import ProductFormModal from "@/components/ProductFormModal";
 import CategoryFormModal from "@/components/CategoryFormModal";
 import SortableCategoryItem from "@/components/SortableCategoryItem";
@@ -34,16 +35,28 @@ export default function InventoryPage() {
 
   const [activeCategoryId, setActiveCategoryId] = useState<string>("all");
   const [search, setSearch] = useState("");
+  const [sort, setSort] = useState<"default" | "low-stock" | "out-stock" | "az">("default");
 
   const [editProduct, setEditProduct] = useState<Product | null | "new">(null);
   const [editCategory, setEditCategory] = useState<Category | null | "new">(null);
   const [confirmDelete, setConfirmDelete] = useState<{ type: "product" | "category"; id: string; name: string } | null>(null);
 
-  const filtered = products.filter((p) => {
-    const matchCat = activeCategoryId === "all" || p.categoryId === activeCategoryId;
-    const matchSearch = p.name.toLowerCase().includes(search.toLowerCase());
-    return matchCat && matchSearch;
-  });
+  const lowStockCount = products.filter((p) => getStockStatus(p) !== "ok").length;
+
+  const filtered = products
+    .filter((p) => {
+      const matchCat = activeCategoryId === "all" || p.categoryId === activeCategoryId;
+      const matchSearch = p.name.toLowerCase().includes(search.toLowerCase());
+      const matchSort = sort === "out-stock" ? getStockStatus(p) === "out"
+                      : sort === "low-stock" ? getStockStatus(p) !== "ok"
+                      : true;
+      return matchCat && matchSearch && matchSort;
+    })
+    .sort((a, b) => {
+      if (sort === "low-stock" || sort === "out-stock") return (a.stock ?? 0) - (b.stock ?? 0);
+      if (sort === "az") return a.name.localeCompare(b.name);
+      return 0;
+    });
 
   const getCategoryName = (id: string) => categories.find((c) => c.id === id)?.name ?? id;
   const getCategoryEmoji = (id: string) => categories.find((c) => c.id === id)?.emoji ?? "📦";
@@ -121,14 +134,42 @@ export default function InventoryPage() {
 
         {/* Right: Product List */}
         <main className="flex-1 min-h-0 flex flex-col overflow-hidden">
-          {/* Search */}
-          <div className="p-4 pb-2">
+          {/* Search + Sort */}
+          <div className="p-4 pb-2 space-y-2">
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="🔍  Search products..."
-              className="w-full bg-white border-2 border-gray-200 rounded-xl px-4 py-3 text-base focus:outline-none focus:border-emerald-400"
+              className="w-full bg-white border-2 border-gray-200 rounded-xl px-4 py-3 text-base text-gray-900 focus:outline-none focus:border-emerald-400"
             />
+            <div className="flex gap-2 flex-wrap">
+              {([
+                { key: "default",   label: "Default" },
+                { key: "low-stock", label: "🟡 Low Stock" },
+                { key: "out-stock", label: "🔴 Out of Stock" },
+                { key: "az",        label: "A–Z" },
+              ] as const).map((s) => (
+                <button
+                  key={s.key}
+                  onClick={() => setSort(s.key)}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all active:scale-95 ${
+                    sort === s.key
+                      ? "bg-emerald-500 text-white"
+                      : "bg-white text-gray-500 border border-gray-200 hover:bg-gray-50"
+                  }`}
+                >
+                  {s.label}
+                </button>
+              ))}
+              {lowStockCount > 0 && (
+                <Link
+                  href="/stocks"
+                  className="ml-auto px-3 py-1.5 rounded-xl text-xs font-bold bg-red-50 text-red-500 border border-red-100 hover:bg-red-100 transition-all"
+                >
+                  ⚠️ {lowStockCount} alert{lowStockCount !== 1 ? "s" : ""} →
+                </Link>
+              )}
+            </div>
           </div>
 
           {/* Product Table */}

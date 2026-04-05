@@ -29,6 +29,7 @@ export default function ProductFormModal({ product, categories, onSave, onClose 
   const [price, setPrice] = useState("");
   const [cogs, setCogs] = useState("");
   const [stock, setStock] = useState("");
+  const [reorderQty, setReorderQty] = useState("");
   const [categoryId, setCategoryId] = useState(categories[0]?.id ?? "");
   const [emoji, setEmoji] = useState("🛒");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -39,6 +40,7 @@ export default function ProductFormModal({ product, categories, onSave, onClose 
       setPrice(product.price.toString());
       setCogs((product.cogs ?? 0).toString());
       setStock((product.stock ?? 0).toString());
+      setReorderQty((product.reorderQty ?? 5).toString());
       setCategoryId(product.categoryId);
       setEmoji(product.emoji);
     } else {
@@ -46,6 +48,7 @@ export default function ProductFormModal({ product, categories, onSave, onClose 
       setPrice("");
       setCogs("");
       setStock("");
+      setReorderQty("5");
       setCategoryId(categories[0]?.id ?? "");
       setEmoji("🛒");
     }
@@ -59,6 +62,7 @@ export default function ProductFormModal({ product, categories, onSave, onClose 
       price: parseFloat(price),
       cogs: parseFloat(cogs) || 0,
       stock: parseInt(stock) || 0,
+      reorderQty: parseInt(reorderQty) || 5,
       categoryId,
       emoji,
     });
@@ -144,18 +148,33 @@ export default function ProductFormModal({ product, categories, onSave, onClose 
             </div>
           </div>
 
-          {/* Stock / Quantity */}
-          <div>
-            <label className="text-sm font-semibold text-gray-900 block mb-1">Quantity (Stock)</label>
-            <input
-              type="number"
-              value={stock}
-              onChange={(e) => setStock(e.target.value)}
-              placeholder="0"
-              min="0"
-              step="1"
-              className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-emerald-400"
-            />
+          {/* Stock + Reorder Qty side by side */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-sm font-semibold text-gray-900 block mb-1">Stock (Qty on hand)</label>
+              <input
+                type="number"
+                value={stock}
+                onChange={(e) => setStock(e.target.value)}
+                placeholder="0"
+                min="0"
+                step="1"
+                className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-emerald-400"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-semibold text-gray-900 block mb-1">Reorder Point</label>
+              <input
+                type="number"
+                value={reorderQty}
+                onChange={(e) => setReorderQty(e.target.value)}
+                placeholder="5"
+                min="0"
+                step="1"
+                className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-amber-400"
+              />
+              <p className="text-xs text-gray-400 mt-1">Alert when stock ≤ this</p>
+            </div>
           </div>
 
           {/* Category */}

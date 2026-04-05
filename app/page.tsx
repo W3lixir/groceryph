@@ -3,6 +3,7 @@ import { useState, useCallback } from "react";
 import { useStore } from "@/hooks/useStore";
 import { CartItem, Category, Product } from "@/types";
 import { addTransaction, generateId } from "@/lib/store";
+import { getStockStatus } from "@/lib/stockStatus";
 import CategoryGrid from "@/components/CategoryGrid";
 import ProductPopup from "@/components/ProductPopup";
 import Cart from "@/components/Cart";
@@ -11,6 +12,7 @@ import Link from "next/link";
 
 export default function POSPage() {
   const { categories, products } = useStore();
+  const alertCount = products.filter((p) => getStockStatus(p) !== "ok").length;
   const [activeCategory, setActiveCategory] = useState<Category | null>(null);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [history, setHistory] = useState<CartItem[][]>([]);
@@ -101,6 +103,17 @@ export default function POSPage() {
             <p className="text-sm font-bold text-gray-700">{timeStr}</p>
             <p className="text-xs text-gray-400">{dateStr}</p>
           </div>
+          <Link
+            href="/stocks"
+            className="relative flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-600 font-semibold text-sm px-4 py-2 rounded-xl transition-all active:scale-95"
+          >
+            📋 Stocks
+            {alertCount > 0 && (
+              <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">
+                {alertCount}
+              </span>
+            )}
+          </Link>
           <Link
             href="/transactions"
             className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-600 font-semibold text-sm px-4 py-2 rounded-xl transition-all active:scale-95"
