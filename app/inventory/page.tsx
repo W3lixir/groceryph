@@ -1,13 +1,36 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
+import {
+  DndContext, closestCenter, PointerSensor, TouchSensor,
+  useSensor, useSensors, DragEndEvent,
+} from "@dnd-kit/core";
+import { SortableContext, verticalListSortingStrategy, arrayMove } from "@dnd-kit/sortable";
 import { useStore } from "@/hooks/useStore";
 import { Category, Product } from "@/types";
+import { saveCategories } from "@/lib/store";
 import ProductFormModal from "@/components/ProductFormModal";
 import CategoryFormModal from "@/components/CategoryFormModal";
+import SortableCategoryItem from "@/components/SortableCategoryItem";
 
 export default function InventoryPage() {
   const { categories, products, saveProduct, removeProduct, saveCategory, removeCategory } = useStore();
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 5 } }),
+  );
+
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const oldIndex = categories.findIndex((c) => c.id === active.id);
+    const newIndex = categories.findIndex((c) => c.id === over.id);
+    const reordered = arrayMove(categories, oldIndex, newIndex);
+    saveCategories(reordered);
+    // force re-read by triggering a save on the first item (triggers useStore refresh)
+    window.dispatchEvent(new Event("gpos-categories-updated"));
+  }
 
   const [activeCategoryId, setActiveCategoryId] = useState<string>("all");
   const [search, setSearch] = useState("");
@@ -74,42 +97,26 @@ export default function InventoryPage() {
             </button>
           </div>
 
-          <div className="flex-1 overflow-y-auto px-3 pb-3 space-y-1">
-            {categories.map((cat) => {
-              const count = products.filter((p) => p.categoryId === cat.id).length;
-              return (
-                <div key={cat.id} className="group relative">
-                  <button
-                    onClick={() => setActiveCategoryId(cat.id)}
-                    className={`w-full text-left px-3 py-2 rounded-xl text-sm font-semibold transition-all pr-14 ${
-                      activeCategoryId === cat.id
-                        ? "bg-emerald-500 text-white"
-                        : "text-gray-600 hover:bg-gray-100"
-                    }`}
-                  >
-                    {cat.emoji} {cat.name}
-                    <span className={`ml-1 text-xs ${activeCategoryId === cat.id ? "text-emerald-100" : "text-gray-400"}`}>
-                      ({count})
-                    </span>
-                  </button>
-                  <div className="absolute right-2 top-1/2 -translate-y-1/2 hidden group-hover:flex gap-1">
-                    <button
-                      onClick={() => setEditCategory(cat)}
-                      className="w-6 h-6 rounded-lg bg-white shadow text-gray-500 hover:text-emerald-600 text-xs flex items-center justify-center"
-                    >
-                      ✎
-                    </button>
-                    <button
-                      onClick={() => setConfirmDelete({ type: "category", id: cat.id, name: cat.name })}
-                      className="w-6 h-6 rounded-lg bg-white shadow text-gray-500 hover:text-red-500 text-xs flex items-center justify-center"
-                    >
-                      ✕
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+            <SortableContext items={categories.map((c) => c.id)} strategy={verticalListSortingStrategy}>
+              <div className="flex-1 overflow-y-auto px-2 pb-3 space-y-1">
+                {categories.map((cat) => {
+                  const count = products.filter((p) => p.categoryId === cat.id).length;
+                  return (
+                    <SortableCategoryItem
+                      key={cat.id}
+                      cat={cat}
+                      count={count}
+                      isActive={activeCategoryId === cat.id}
+                      onSelect={() => setActiveCategoryId(cat.id)}
+                      onEdit={() => setEditCategory(cat)}
+                      onDelete={() => setConfirmDelete({ type: "category", id: cat.id, name: cat.name })}
+                    />
+                  );
+                })}
+              </div>
+            </SortableContext>
+          </DndContext>
         </aside>
 
         {/* Right: Product List */}

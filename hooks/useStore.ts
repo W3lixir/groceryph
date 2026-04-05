@@ -18,6 +18,11 @@ export function useStore() {
   useEffect(() => {
     setCategories(getCategories());
     setProducts(getProducts());
+
+    // Re-read categories when drag-and-drop reorder happens
+    const onReorder = () => setCategories(getCategories());
+    window.addEventListener("gpos-categories-updated", onReorder);
+    return () => window.removeEventListener("gpos-categories-updated", onReorder);
   }, []);
 
   const refreshProducts = () => setProducts(getProducts());
