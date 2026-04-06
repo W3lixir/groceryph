@@ -141,6 +141,7 @@ export default function LoginPage() {
           </div>
           <button
             onClick={() => {
+              document.cookie = "groceryph_demo=true; path=/; max-age=86400";
               localStorage.setItem(DEMO_KEY, "true");
               initDemo();
               router.push("/");

@@ -104,4 +104,5 @@ export function exitDemo() {
   localStorage.removeItem("demo_categories");
   localStorage.removeItem("demo_products");
   localStorage.removeItem("demo_transactions");
+  document.cookie = "groceryph_demo=; path=/; max-age=0";
 }

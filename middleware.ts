@@ -24,8 +24,9 @@ export async function middleware(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser();
 
   const isLoginPage = request.nextUrl.pathname === "/login";
+  const isDemo = request.cookies.get("groceryph_demo")?.value === "true";
 
-  if (!user && !isLoginPage) {
+  if (!user && !isLoginPage && !isDemo) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);
