@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Transaction, CartItem } from "@/types";
 import { createClient } from "@/lib/supabase";
+import { isDemoMode, demoGetTransactions } from "@/lib/demoStore";
 
 type Filter = "today" | "week" | "month" | "all";
 
@@ -38,6 +39,10 @@ export default function TransactionsPage() {
   const [expanded, setExpanded] = useState<string | null>(null);
 
   useEffect(() => {
+    if (isDemoMode()) {
+      setAll(demoGetTransactions());
+      return;
+    }
     const supabase = createClient();
     supabase
       .from("transactions")

@@ -3,6 +3,7 @@ export const dynamic = "force-dynamic";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase";
+import { DEMO_KEY, initDemo } from "@/lib/demoStore";
 
 type Mode = "login" | "signup";
 
@@ -131,6 +132,26 @@ export default function LoginPage() {
           >
             {loading ? "Please wait..." : mode === "login" ? "Log In" : "Create Account"}
           </button>
+
+          {/* Demo Mode */}
+          <div className="relative flex items-center gap-3">
+            <div className="flex-1 border-t border-gray-200" />
+            <span className="text-xs text-gray-400 font-semibold">or</span>
+            <div className="flex-1 border-t border-gray-200" />
+          </div>
+          <button
+            onClick={() => {
+              localStorage.setItem(DEMO_KEY, "true");
+              initDemo();
+              router.push("/");
+            }}
+            className="w-full py-3 rounded-2xl bg-amber-50 border-2 border-amber-200 text-amber-700 font-bold text-sm hover:bg-amber-100 active:scale-95 transition-all"
+          >
+            🎮 Try Demo — No sign-up needed
+          </button>
+          <p className="text-center text-xs text-gray-400">
+            Demo data is stored locally and not saved to the cloud
+          </p>
         </div>
       </div>
     </div>

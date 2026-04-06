@@ -6,6 +6,7 @@ import { CartItem, Category, Product } from "@/types";
 import { generateId } from "@/lib/store";
 import { getStockStatus } from "@/lib/stockStatus";
 import { createClient } from "@/lib/supabase";
+import { isDemoMode, exitDemo } from "@/lib/demoStore";
 import CategoryGrid from "@/components/CategoryGrid";
 import ProductPopup from "@/components/ProductPopup";
 import Cart from "@/components/Cart";
@@ -132,10 +133,14 @@ export default function POSPage() {
             📦 Inventory
           </Link>
           <button
-            onClick={async () => { await supabase.auth.signOut(); router.push("/login"); }}
+            onClick={async () => {
+              if (isDemoMode()) { exitDemo(); router.push("/login"); return; }
+              await supabase.auth.signOut();
+              router.push("/login");
+            }}
             className="flex items-center gap-2 bg-gray-100 hover:bg-red-50 hover:text-red-500 text-gray-500 font-semibold text-sm px-4 py-2 rounded-xl transition-all active:scale-95"
           >
-            🚪 Logout
+            🚪 {isDemoMode() ? "Exit Demo" : "Logout"}
           </button>
         </div>
       </header>

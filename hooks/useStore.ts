@@ -1,7 +1,13 @@
 "use client";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase";
 import { Category, Product, Transaction } from "@/types";
+import {
+  isDemoMode, demoLoad, demoSaveCategory, demoRemoveCategory,
+  demoReorderCategories, demoSaveProduct, demoRemoveProduct,
+  demoSaveTransaction,
+} from "@/lib/demoStore";
+import { generateId } from "@/lib/store";
 
 function mapCategory(row: Record<string, unknown>): Category {
   return { id: row.id as string, name: row.name as string, emoji: row.emoji as string };
@@ -21,6 +27,7 @@ function mapProduct(row: Record<string, unknown>): Product {
 }
 
 export function useStore() {
+  const isDemo = useRef(isDemoMode());
   const supabase = createClient();
   const [categories, setCategories] = useState<Category[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
@@ -28,6 +35,13 @@ export function useStore() {
 
   const load = useCallback(async () => {
     setLoading(true);
+    if (isDemo.current) {
+      const { categories: cats, products: prods } = demoLoad();
+      setCategories(cats);
+      setProducts(prods);
+      setLoading(false);
+      return;
+    }
     const [catsRes, prodsRes] = await Promise.all([
       supabase.from("categories").select("*").order("sort_order"),
       supabase.from("products").select("*").order("name"),
@@ -47,6 +61,12 @@ export function useStore() {
 
   // ── Categories ───────────────────────────────────────────
   const saveCategory = async (cat: Category) => {
+    if (isDemo.current) {
+      if (!cat.id) cat = { ...cat, id: generateId() };
+      demoSaveCategory(cat);
+      await load();
+      return;
+    }
     const uid = await getUserId();
     if (!uid) return;
 
@@ -70,6 +90,11 @@ export function useStore() {
   };
 
   const removeCategory = async (id: string) => {
+    if (isDemo.current) {
+      demoRemoveCategory(id);
+      await load();
+      return;
+    }
     await supabase.from("products").delete().eq("category_id", id);
     await supabase.from("categories").delete().eq("id", id);
     await load();
@@ -77,6 +102,10 @@ export function useStore() {
 
   const reorderCategories = async (reordered: Category[]) => {
     setCategories(reordered); // optimistic update
+    if (isDemo.current) {
+      demoReorderCategories(reordered);
+      return;
+    }
     await Promise.all(
       reordered.map((c, i) =>
         supabase.from("categories").update({ sort_order: i }).eq("id", c.id)
@@ -86,6 +115,12 @@ export function useStore() {
 
   // ── Products ─────────────────────────────────────────────
   const saveProduct = async (p: Product) => {
+    if (isDemo.current) {
+      if (!p.id) p = { ...p, id: generateId() };
+      demoSaveProduct(p);
+      await load();
+      return;
+    }
     const uid = await getUserId();
     if (!uid) return;
 
@@ -111,12 +146,22 @@ export function useStore() {
   };
 
   const removeProduct = async (id: string) => {
+    if (isDemo.current) {
+      demoRemoveProduct(id);
+      await load();
+      return;
+    }
     await supabase.from("products").delete().eq("id", id);
     await load();
   };
 
   // ── Transactions ─────────────────────────────────────────
   const saveTransaction = async (txn: Transaction) => {
+    if (isDemo.current) {
+      demoSaveTransaction(txn);
+      await load();
+      return;
+    }
     const uid = await getUserId();
     if (!uid) return;
 

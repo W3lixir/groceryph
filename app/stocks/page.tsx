@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Product } from "@/types";
 import { createClient } from "@/lib/supabase";
 import { getStockStatus, STOCK_BADGE } from "@/lib/stockStatus";
+import { isDemoMode, demoLoad, demoRestockProduct } from "@/lib/demoStore";
 
 type Filter = "all-alerts" | "out" | "low";
 
@@ -16,6 +17,12 @@ export default function StocksPage() {
   const [restockQty, setRestockQty] = useState("");
 
   const reload = async () => {
+    if (isDemoMode()) {
+      const { products: prods, categories: cats } = demoLoad();
+      setCategories(cats);
+      setProducts(prods);
+      return;
+    }
     const supabase = createClient();
     const [prodsRes, catsRes] = await Promise.all([
       supabase.from("products").select("*"),
@@ -50,8 +57,12 @@ export default function StocksPage() {
   const handleRestock = async (product: Product) => {
     const qty = parseInt(restockQty);
     if (!qty || qty <= 0) return;
-    const supabase = createClient();
-    await supabase.from("products").update({ stock: (product.stock ?? 0) + qty }).eq("id", product.id);
+    if (isDemoMode()) {
+      demoRestockProduct(product.id, qty);
+    } else {
+      const supabase = createClient();
+      await supabase.from("products").update({ stock: (product.stock ?? 0) + qty }).eq("id", product.id);
+    }
     setRestockId(null);
     setRestockQty("");
     await reload();
