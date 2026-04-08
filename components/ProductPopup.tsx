@@ -11,11 +11,12 @@ interface Props {
 export default function ProductPopup({ category, products, onAddToCart, onClose }: Props) {
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-start justify-start"
       onClick={onClose}
     >
       <div
-        className="bg-white w-full max-w-2xl rounded-t-3xl shadow-2xl"
+        className="bg-white rounded-2xl shadow-2xl mt-4 ml-4"
+        style={{ width: "min(95vw, 680px)" }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -26,28 +27,28 @@ export default function ProductPopup({ category, products, onAddToCart, onClose 
           </div>
           <button
             onClick={onClose}
-            className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200 active:scale-95 transition-all text-xl font-bold"
+            className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200 active:scale-95 transition-all text-xl font-bold"
           >
             ✕
           </button>
         </div>
 
         {/* Products Grid */}
-        <div className="grid grid-cols-3 gap-3 p-5 max-h-[60vh] overflow-y-auto">
+        <div className="grid grid-cols-5 gap-3 p-4 max-h-[80vh] overflow-y-auto">
           {products.map((product) => (
             <button
               key={product.id}
               onClick={() => onAddToCart(product)}
               className="
                 flex flex-col items-center justify-center gap-2
-                rounded-2xl p-4 bg-gray-50 border border-gray-100
+                rounded-2xl py-6 px-2 bg-gray-50 border border-gray-100
                 hover:bg-emerald-50 hover:border-emerald-300
                 active:scale-95 active:bg-emerald-100
                 transition-all select-none shadow-sm
               "
             >
-              <span className="text-4xl">{product.emoji}</span>
-              <span className="text-xs font-semibold text-gray-700 text-center leading-tight">
+              <span className="text-5xl">{product.emoji}</span>
+              <span className="text-sm font-semibold text-gray-700 text-center leading-tight">
                 {product.name}
               </span>
               <span className="text-base font-bold text-emerald-600">

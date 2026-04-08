@@ -56,7 +56,7 @@ export default function LoginPage() {
           <p className="text-emerald-100 text-sm mt-1">Point of Sale System</p>
         </div>
 
-        <div className="p-8 space-y-4">
+        <div className="p-8 space-y-4" suppressHydrationWarning>
           {/* Mode Toggle */}
           <div className="grid grid-cols-2 bg-gray-100 rounded-2xl p-1">
             <button
