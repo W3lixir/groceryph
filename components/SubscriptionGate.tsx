@@ -106,7 +106,7 @@ export default function SubscriptionGate({ children }: { children: React.ReactNo
               </ol>
               <div className="bg-white rounded-xl p-3 border border-gray-200 flex justify-center">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/qr-maya.jpg" alt="Maya QR Code" className="w-48 h-48 object-contain" />
+                <img src="/qr-maya.jpg" alt="Maya QR Code" className="w-full object-contain" />
               </div>
               <ol start={2} className="space-y-2 text-sm text-gray-600 list-decimal list-inside">
                 <li>I-screenshot ang payment confirmation</li>
