@@ -104,9 +104,9 @@ export default function SubscriptionGate({ children }: { children: React.ReactNo
               <ol className="space-y-2 text-sm text-gray-600 list-decimal list-inside">
                 <li>I-send ng <span className="font-bold text-gray-800">₱199</span> via <span className="font-bold">Maya / GCash</span> sa:</li>
               </ol>
-              <div className="bg-white rounded-xl px-4 py-3 border border-gray-200 text-center">
-                <p className="text-xs text-gray-400">Maya / GCash Number</p>
-                <p className="text-xl font-bold text-gray-900 tracking-wide">{MAYA_NUMBER}</p>
+              <div className="bg-white rounded-xl p-3 border border-gray-200 flex justify-center">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/qr-maya.jpg" alt="Maya QR Code" className="w-48 h-48 object-contain" />
               </div>
               <ol start={2} className="space-y-2 text-sm text-gray-600 list-decimal list-inside">
                 <li>I-screenshot ang payment confirmation</li>
