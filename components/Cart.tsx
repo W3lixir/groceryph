@@ -74,24 +74,24 @@ export default function Cart({ items, onRemoveOne, onUndo, onClear, onCheckout }
           <button
             onClick={onUndo}
             disabled={items.length === 0}
-            className="flex items-center justify-center gap-2 py-3 rounded-xl bg-amber-100 text-amber-700 font-semibold text-sm hover:bg-amber-200 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+            className="flex items-center justify-center gap-2 py-5 rounded-xl bg-amber-100 text-amber-700 font-bold text-base hover:bg-amber-200 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
           >
             ↩ UNDO
           </button>
           <button
             onClick={onClear}
             disabled={items.length === 0}
-            className="flex items-center justify-center gap-2 py-3 rounded-xl bg-red-100 text-red-600 font-semibold text-sm hover:bg-red-200 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+            className="flex items-center justify-center gap-2 py-5 rounded-xl bg-red-100 text-red-600 font-bold text-base hover:bg-red-200 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            🗑 CLEAR
+            CLEAR
           </button>
         </div>
         <button
           onClick={onCheckout}
           disabled={items.length === 0}
-          className="w-full py-4 rounded-2xl bg-emerald-500 text-white font-bold text-lg hover:bg-emerald-600 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-emerald-200"
+          className="w-full py-6 rounded-2xl bg-emerald-500 text-white font-bold text-xl hover:bg-emerald-600 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-emerald-200"
         >
-          💳 CHECKOUT
+          CHECKOUT
         </button>
       </div>
     </div>
