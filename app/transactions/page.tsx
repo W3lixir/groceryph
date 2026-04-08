@@ -90,7 +90,7 @@ export default function TransactionsPage() {
         <div className="flex items-center gap-3">
           <Link
             href="/"
-            className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-600 font-semibold text-sm px-4 py-2 rounded-xl transition-all active:scale-95"
+            className="no-print flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-600 font-semibold text-sm px-4 py-2 rounded-xl transition-all active:scale-95"
           >
             ← POS
           </Link>
@@ -99,10 +99,16 @@ export default function TransactionsPage() {
             <p className="text-xs text-gray-400">{filtered.length} transaction{filtered.length !== 1 ? "s" : ""}</p>
           </div>
         </div>
+        <button
+          onClick={() => window.print()}
+          className="no-print flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold text-sm px-4 py-2 rounded-xl transition-all active:scale-95"
+        >
+          🖨️ Print
+        </button>
       </header>
 
       {/* Filter Tabs */}
-      <div className="bg-white border-b border-gray-100 px-6 py-3 flex gap-2">
+      <div className="no-print bg-white border-b border-gray-100 px-6 py-3 flex gap-2">
         {FILTERS.map((f) => (
           <button
             key={f.key}

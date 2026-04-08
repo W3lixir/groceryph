@@ -66,7 +66,7 @@ export default function InventoryPage() {
         <div className="flex items-center gap-3">
           <Link
             href="/"
-            className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-600 font-semibold text-sm px-4 py-2 rounded-xl transition-all active:scale-95"
+            className="no-print flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-600 font-semibold text-sm px-4 py-2 rounded-xl transition-all active:scale-95"
           >
             ← POS
           </Link>
@@ -77,14 +77,20 @@ export default function InventoryPage() {
         </div>
         <div className="flex gap-2">
           <button
+            onClick={() => window.print()}
+            className="no-print flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold text-sm px-4 py-2 rounded-xl transition-all active:scale-95"
+          >
+            🖨️ Print
+          </button>
+          <button
             onClick={() => setEditCategory("new")}
-            className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold text-sm px-4 py-2 rounded-xl transition-all active:scale-95"
+            className="no-print flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold text-sm px-4 py-2 rounded-xl transition-all active:scale-95"
           >
             + Category
           </button>
           <button
             onClick={() => setEditProduct("new")}
-            className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold text-sm px-4 py-2 rounded-xl transition-all active:scale-95 shadow-lg shadow-emerald-200"
+            className="no-print flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold text-sm px-4 py-2 rounded-xl transition-all active:scale-95 shadow-lg shadow-emerald-200"
           >
             + Product
           </button>
@@ -93,7 +99,7 @@ export default function InventoryPage() {
 
       <div className="flex flex-1 min-h-0 gap-0">
         {/* Left: Category Sidebar */}
-        <aside className="w-48 bg-white border-r border-gray-100 flex flex-col overflow-hidden">
+        <aside className="no-print w-48 bg-white border-r border-gray-100 flex flex-col overflow-hidden">
           <div className="p-3">
             <p className="text-xs font-bold text-gray-400 uppercase tracking-wide px-1 mb-2">Categories</p>
             <button
@@ -133,7 +139,7 @@ export default function InventoryPage() {
         {/* Right: Product List */}
         <main className="flex-1 min-h-0 flex flex-col overflow-hidden">
           {/* Search + Sort */}
-          <div className="p-4 pb-2 space-y-2">
+          <div className="no-print p-4 pb-2 space-y-2">
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -192,7 +198,7 @@ export default function InventoryPage() {
                   <span className="text-xs font-bold text-gray-400 uppercase tracking-wide text-right">Stock</span>
                   <span className="text-xs font-bold text-gray-400 uppercase tracking-wide text-right">COGS</span>
                   <span className="text-xs font-bold text-gray-400 uppercase tracking-wide text-right">SRP</span>
-                  <span className="text-xs font-bold text-gray-400 uppercase tracking-wide text-center">Actions</span>
+                  <span className="no-print text-xs font-bold text-gray-400 uppercase tracking-wide text-center">Actions</span>
                 </div>
 
                 {filtered.map((product, idx) => (
@@ -232,7 +238,7 @@ export default function InventoryPage() {
                     </div>
 
                     {/* Actions */}
-                    <div className="flex gap-2 justify-center">
+                    <div className="no-print flex gap-2 justify-center">
                       <button
                         onClick={() => setEditProduct(product)}
                         className="px-3 py-2 rounded-xl bg-gray-100 text-gray-600 text-sm font-semibold hover:bg-emerald-50 hover:text-emerald-600 active:scale-95 transition-all"
