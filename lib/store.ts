@@ -65,6 +65,10 @@ export function generateId(): string {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 }
 
+export function clearCache(): void {
+  Object.values(KEYS).forEach((k) => localStorage.removeItem(k));
+}
+
 // Transactions
 export function getTransactions(): Transaction[] {
   if (typeof window === "undefined") return [];

@@ -1,5 +1,6 @@
 import { Category, Product, Transaction } from "@/types";
 import { categories as seedCats, products as seedProds } from "@/data/products";
+import { clearCache } from "@/lib/store";
 
 export const DEMO_KEY = "groceryph_demo";
 
@@ -105,4 +106,5 @@ export function exitDemo() {
   localStorage.removeItem("demo_products");
   localStorage.removeItem("demo_transactions");
   document.cookie = "groceryph_demo=; path=/; max-age=0";
+  clearCache();
 }

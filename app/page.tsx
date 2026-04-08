@@ -3,7 +3,7 @@ export const dynamic = "force-dynamic";
 import { useState, useCallback } from "react";
 import { useStore } from "@/hooks/useStore";
 import { CartItem, Category, Product } from "@/types";
-import { generateId } from "@/lib/store";
+import { generateId, clearCache } from "@/lib/store";
 import { createClient } from "@/lib/supabase";
 import { isDemoMode, exitDemo } from "@/lib/demoStore";
 import CategoryGrid from "@/components/CategoryGrid";
@@ -122,6 +122,7 @@ const [activeCategory, setActiveCategory] = useState<Category | null>(null);
           <button
             onClick={async () => {
               if (isDemoMode()) { exitDemo(); router.push("/login"); return; }
+              clearCache();
               await supabase.auth.signOut();
               router.push("/login");
             }}

@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase";
 import { useRouter, usePathname } from "next/navigation";
 import { DEMO_KEY, exitDemo } from "@/lib/demoStore";
+import { clearCache } from "@/lib/store";
 
 const MAYA_NUMBER = "09154268766";
 const FB_PAGE = "https://web.facebook.com/profile.php?id=61573480382338";
@@ -130,7 +131,7 @@ export default function SubscriptionGate({ children }: { children: React.ReactNo
             </div>
 
             <button
-              onClick={async () => { await supabase.auth.signOut(); router.push("/login"); }}
+              onClick={async () => { clearCache(); await supabase.auth.signOut(); router.push("/login"); }}
               className="w-full py-3 rounded-2xl bg-gray-100 text-gray-500 font-semibold text-sm hover:bg-gray-200 active:scale-95 transition-all"
             >
               🚪 Sign out
