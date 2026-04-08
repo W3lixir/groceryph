@@ -40,14 +40,3 @@ button, a {
 @media (prefers-color-scheme: dark) {
   html { color-scheme: light; }
 }
-
-/* Print styles */
-@media print {
-  .no-print { display: none !important; }
-  body { overflow: visible !important; height: auto !important; }
-  .h-dvh { height: auto !important; }
-  .overflow-hidden { overflow: visible !important; }
-  .overflow-y-auto { overflow: visible !important; }
-  .max-h-\[80vh\] { max-height: none !important; }
-  header { box-shadow: none !important; }
-}
