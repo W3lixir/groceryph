@@ -17,7 +17,7 @@ export default function POSPage() {
   const { categories, products, saveTransaction } = useStore();
   const router = useRouter();
   const supabase = createClient();
-const [activeCategory, setActiveCategory] = useState<Category | null>(null);
+  const [activeCategory, setActiveCategory] = useState<Category | null>(null);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [history, setHistory] = useState<CartItem[][]>([]);
   const [showCheckout, setShowCheckout] = useState(false);
@@ -94,30 +94,30 @@ const [activeCategory, setActiveCategory] = useState<Category | null>(null);
   return (
     <div className="h-dvh bg-gray-100 flex flex-col overflow-hidden">
       {/* Top Bar */}
-      <header className="bg-white shadow-sm px-6 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-3">
+      <header className="bg-white shadow-sm px-4 md:px-6 py-3 flex items-center justify-between">
+        <div className="flex items-center gap-2 md:gap-3">
           <span className="text-2xl">🏪</span>
-          <div>
+          <div className="hidden sm:block">
             <h1 className="font-bold text-gray-800 text-lg leading-tight">My Grocery</h1>
             <p className="text-xs text-gray-400">POS System</p>
           </div>
         </div>
-        <div className="flex items-center gap-4">
-          <div className="text-right">
+        <div className="flex items-center gap-2 md:gap-4">
+          <div className="text-right hidden md:block">
             <p className="text-sm font-bold text-gray-700">{timeStr}</p>
             <p className="text-xs text-gray-400">{dateStr}</p>
           </div>
           <Link
             href="/transactions"
-            className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-600 font-semibold text-sm px-4 py-2 rounded-xl transition-all active:scale-95"
+            className="flex items-center gap-1 md:gap-2 bg-gray-100 hover:bg-gray-200 text-gray-600 font-semibold text-sm px-3 md:px-4 py-2 rounded-xl transition-all active:scale-95"
           >
-            🧾 Transactions
+            🧾 <span className="hidden sm:inline">Transactions</span>
           </Link>
           <Link
             href="/inventory"
-            className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-600 font-semibold text-sm px-4 py-2 rounded-xl transition-all active:scale-95"
+            className="flex items-center gap-1 md:gap-2 bg-gray-100 hover:bg-gray-200 text-gray-600 font-semibold text-sm px-3 md:px-4 py-2 rounded-xl transition-all active:scale-95"
           >
-            📦 Inventory
+            📦 <span className="hidden sm:inline">Inventory</span>
           </Link>
           <button
             onClick={async () => {
@@ -126,20 +126,20 @@ const [activeCategory, setActiveCategory] = useState<Category | null>(null);
               await supabase.auth.signOut();
               router.push("/login");
             }}
-            className="flex items-center gap-2 bg-gray-100 hover:bg-red-50 hover:text-red-500 text-gray-500 font-semibold text-sm px-4 py-2 rounded-xl transition-all active:scale-95"
+            className="flex items-center gap-1 md:gap-2 bg-gray-100 hover:bg-red-50 hover:text-red-500 text-gray-500 font-semibold text-sm px-3 md:px-4 py-2 rounded-xl transition-all active:scale-95"
           >
-            🚪 {isDemoMode() ? "Exit Demo" : "Logout"}
+            🚪 <span className="hidden sm:inline">{isDemoMode() ? "Exit Demo" : "Logout"}</span>
           </button>
         </div>
       </header>
 
       {/* Success Banner */}
       {lastTxn && (
-        <div className="bg-emerald-500 text-white px-6 py-3 flex items-center justify-between">
+        <div className="bg-emerald-500 text-white px-4 md:px-6 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="text-xl">✅</span>
-            <span className="font-semibold">
-              Transaction complete! ₱{lastTxn.total.toFixed(2)} via {lastTxn.mode}
+            <span className="font-semibold text-sm md:text-base">
+              Done! ₱{lastTxn.total.toFixed(2)}
               {lastTxn.mode === "Cash" && lastTxn.change >= 0 && ` — Change: ₱${lastTxn.change.toFixed(2)}`}
             </span>
           </div>
@@ -153,9 +153,9 @@ const [activeCategory, setActiveCategory] = useState<Category | null>(null);
       )}
 
       {/* Main Content */}
-      <div className="flex flex-1 min-h-0 gap-4 p-4">
-        {/* Left: Categories */}
-        <div className="w-1/2 min-h-0 bg-gray-100 rounded-2xl overflow-y-auto">
+      <div className="flex flex-1 min-h-0 flex-col md:flex-row gap-3 p-3 md:gap-4 md:p-4">
+        {/* Top (mobile) / Left (desktop): Categories */}
+        <div className="flex-[2] md:flex-1 min-h-0 md:w-1/2 bg-gray-100 rounded-2xl overflow-y-auto">
           <div className="px-4 pt-4 pb-1">
             <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide">Categories</h2>
           </div>
@@ -166,8 +166,8 @@ const [activeCategory, setActiveCategory] = useState<Category | null>(null);
           />
         </div>
 
-        {/* Right: Cart */}
-        <div className="w-1/2 min-h-0 h-full">
+        {/* Bottom (mobile) / Right (desktop): Cart */}
+        <div className="flex-[3] md:flex-1 min-h-0 md:w-1/2">
           <Cart
             items={cart}
             onRemoveOne={removeOne}

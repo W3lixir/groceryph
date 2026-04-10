@@ -9,14 +9,14 @@ interface Props {
 
 export default function CategoryGrid({ categories, onSelect, activeId }: Props) {
   return (
-    <div className="grid grid-cols-2 gap-3 p-4">
+    <div className="grid grid-cols-2 gap-2 md:gap-3 p-2 md:p-4">
       {categories.map((cat) => (
         <button
           key={cat.id}
           onClick={() => onSelect(cat)}
           className={`
-            flex flex-col items-center justify-center gap-2
-            rounded-2xl p-5 text-center font-semibold text-lg
+            flex flex-col items-center justify-center gap-1 md:gap-2
+            rounded-2xl p-3 md:p-5 text-center font-semibold
             transition-all active:scale-95 select-none
             ${activeId === cat.id
               ? "bg-emerald-500 text-white shadow-lg shadow-emerald-200"
@@ -24,8 +24,8 @@ export default function CategoryGrid({ categories, onSelect, activeId }: Props) 
             }
           `}
         >
-          <span className="text-4xl">{cat.emoji}</span>
-          <span className="text-sm font-bold">{cat.name}</span>
+          <span className="text-2xl md:text-4xl">{cat.emoji}</span>
+          <span className="text-xs md:text-sm font-bold">{cat.name}</span>
         </button>
       ))}
     </div>

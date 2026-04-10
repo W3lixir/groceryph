@@ -62,27 +62,27 @@ export default function InventoryPage() {
   return (
     <div className="h-dvh bg-gray-100 flex flex-col overflow-hidden">
       {/* Header */}
-      <header className="bg-white shadow-sm px-6 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-3">
+      <header className="bg-white shadow-sm px-4 md:px-6 py-3 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 md:gap-3 min-w-0">
           <Link
             href="/"
-            className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-600 font-semibold text-sm px-4 py-2 rounded-xl transition-all active:scale-95"
+            className="flex items-center gap-1 md:gap-2 bg-gray-100 hover:bg-gray-200 text-gray-600 font-semibold text-sm px-3 md:px-4 py-2 rounded-xl transition-all active:scale-95 shrink-0"
           >
-            ← POS
+            ← <span className="hidden sm:inline">POS</span>
           </Link>
-          <div>
-            <h1 className="font-bold text-gray-800 text-lg leading-tight">📦 Inventory</h1>
-            <p className="text-xs text-gray-400">{products.length} products · {categories.length} categories</p>
+          <div className="min-w-0">
+            <h1 className="font-bold text-gray-800 text-base md:text-lg leading-tight truncate">📦 Inventory</h1>
+            <p className="text-xs text-gray-400 hidden sm:block">{products.length} products · {categories.length} categories</p>
           </div>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 shrink-0">
           <button
             onClick={() => {
+              if (!confirm("I-download ang inventory CSV?")) return;
               const rows = [
-                ["Product", "Emoji", "Category", "Stock", "COGS", "SRP"],
+                ["Product", "Category", "Stock", "COGS", "SRP"],
                 ...filtered.map((p) => [
                   p.name,
-                  p.emoji,
                   getCategoryName(p.categoryId),
                   p.stock ?? 0,
                   (p.cogs ?? 0).toFixed(2),
@@ -95,75 +95,135 @@ export default function InventoryPage() {
               a.download = `inventory-${new Date().toISOString().slice(0, 10)}.csv`;
               a.click();
             }}
-            className="flex items-center gap-2 bg-green-50 hover:bg-green-100 text-green-700 border border-green-200 font-semibold text-sm px-4 py-2 rounded-xl transition-all active:scale-95"
+            className="flex items-center gap-1 md:gap-2 bg-green-50 hover:bg-green-100 text-green-700 border border-green-200 font-semibold text-sm px-3 md:px-4 py-2 rounded-xl transition-all active:scale-95"
           >
-            ⬇️ Download CSV
+            ⬇️ <span className="hidden sm:inline">Inventory</span>
+          </button>
+          <button
+            onClick={() => {
+              if (!confirm("I-download ang Purchase Order CSV?")) return;
+              const restock = products.filter((p) => getStockStatus(p) !== "ok");
+              if (restock.length === 0) return alert("Walang items na kailangan i-restock!");
+              const rows = [
+                ["Product", "Category", "Current Stock", "Reorder Qty", "COGS", "SRP", "Status"],
+                ...restock.map((p) => [
+                  p.name,
+                  getCategoryName(p.categoryId),
+                  p.stock ?? 0,
+                  p.reorderQty ?? 5,
+                  (p.cogs ?? 0).toFixed(2),
+                  p.price.toFixed(2),
+                  getStockStatus(p) === "out" ? "Out of Stock" : "Low Stock",
+                ]),
+              ];
+              const csv = rows.map((r) => r.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(",")).join("\n");
+              const a = document.createElement("a");
+              a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
+              a.download = `purchase-order-${new Date().toISOString().slice(0, 10)}.csv`;
+              a.click();
+            }}
+            className="flex items-center gap-1 md:gap-2 bg-orange-50 hover:bg-orange-100 text-orange-700 border border-orange-200 font-semibold text-sm px-3 md:px-4 py-2 rounded-xl transition-all active:scale-95"
+          >
+            ⬇️ <span className="hidden sm:inline">PO</span>
           </button>
           <button
             onClick={() => setEditCategory("new")}
-            className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold text-sm px-4 py-2 rounded-xl transition-all active:scale-95"
+            className="flex items-center gap-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold text-sm px-3 md:px-4 py-2 rounded-xl transition-all active:scale-95"
           >
-            + Category
+            + <span className="hidden sm:inline">Category</span>
           </button>
           <button
             onClick={() => setEditProduct("new")}
-            className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold text-sm px-4 py-2 rounded-xl transition-all active:scale-95 shadow-lg shadow-emerald-200"
+            className="flex items-center gap-1 md:gap-2 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold text-sm px-3 md:px-4 py-2 rounded-xl transition-all active:scale-95 shadow-lg shadow-emerald-200"
           >
-            + Product
+            + <span className="hidden sm:inline">Product</span>
           </button>
         </div>
       </header>
 
-      <div className="flex flex-1 min-h-0 gap-0">
-        {/* Left: Category Sidebar */}
-        <aside className="w-48 bg-white border-r border-gray-100 flex flex-col overflow-hidden">
-          <div className="p-3">
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-wide px-1 mb-2">Categories</p>
+      <div className="flex flex-1 min-h-0 flex-col md:flex-row gap-0">
+        {/* Category Sidebar — vertical on desktop, horizontal scroll on mobile */}
+        <aside className="md:w-48 bg-white border-b md:border-b-0 md:border-r border-gray-100 flex md:flex-col flex-row overflow-x-auto md:overflow-x-hidden md:overflow-y-auto shrink-0">
+          {/* Mobile: horizontal chip list */}
+          <div className="flex md:hidden flex-row gap-2 px-3 py-2">
             <button
               onClick={() => setActiveCategoryId("all")}
-              className={`w-full text-left px-3 py-2 rounded-xl text-sm font-semibold transition-all mb-1 ${
+              className={`shrink-0 px-3 py-1.5 rounded-xl text-sm font-semibold transition-all ${
                 activeCategoryId === "all"
                   ? "bg-emerald-500 text-white"
-                  : "text-gray-600 hover:bg-gray-100"
+                  : "text-gray-600 bg-gray-100"
               }`}
             >
               🗂 All ({products.length})
             </button>
+            {categories.map((cat) => {
+              const count = products.filter((p) => p.categoryId === cat.id).length;
+              return (
+                <button
+                  key={cat.id}
+                  onClick={() => setActiveCategoryId(cat.id)}
+                  className={`shrink-0 px-3 py-1.5 rounded-xl text-sm font-semibold transition-all ${
+                    activeCategoryId === cat.id
+                      ? "bg-emerald-500 text-white"
+                      : "text-gray-600 bg-gray-100"
+                  }`}
+                >
+                  {cat.emoji} {cat.name} ({count})
+                </button>
+              );
+            })}
           </div>
 
-          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-            <SortableContext items={categories.map((c) => c.id)} strategy={verticalListSortingStrategy}>
-              <div className="flex-1 overflow-y-auto px-2 pb-3 space-y-1">
-                {categories.map((cat) => {
-                  const count = products.filter((p) => p.categoryId === cat.id).length;
-                  return (
-                    <SortableCategoryItem
-                      key={cat.id}
-                      cat={cat}
-                      count={count}
-                      isActive={activeCategoryId === cat.id}
-                      onSelect={() => setActiveCategoryId(cat.id)}
-                      onEdit={() => setEditCategory(cat)}
-                      onDelete={() => setConfirmDelete({ type: "category", id: cat.id, name: cat.name })}
-                    />
-                  );
-                })}
-              </div>
-            </SortableContext>
-          </DndContext>
+          {/* Desktop: vertical sidebar with drag-and-drop */}
+          <div className="hidden md:flex flex-col flex-1 overflow-hidden">
+            <div className="p-3">
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-wide px-1 mb-2">Categories</p>
+              <button
+                onClick={() => setActiveCategoryId("all")}
+                className={`w-full text-left px-3 py-2 rounded-xl text-sm font-semibold transition-all mb-1 ${
+                  activeCategoryId === "all"
+                    ? "bg-emerald-500 text-white"
+                    : "text-gray-600 hover:bg-gray-100"
+                }`}
+              >
+                🗂 All ({products.length})
+              </button>
+            </div>
+
+            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+              <SortableContext items={categories.map((c) => c.id)} strategy={verticalListSortingStrategy}>
+                <div className="flex-1 overflow-y-auto px-2 pb-3 space-y-1">
+                  {categories.map((cat) => {
+                    const count = products.filter((p) => p.categoryId === cat.id).length;
+                    return (
+                      <SortableCategoryItem
+                        key={cat.id}
+                        cat={cat}
+                        count={count}
+                        isActive={activeCategoryId === cat.id}
+                        onSelect={() => setActiveCategoryId(cat.id)}
+                        onEdit={() => setEditCategory(cat)}
+                        onDelete={() => setConfirmDelete({ type: "category", id: cat.id, name: cat.name })}
+                      />
+                    );
+                  })}
+                </div>
+              </SortableContext>
+            </DndContext>
+          </div>
         </aside>
 
-        {/* Right: Product List */}
+        {/* Product List */}
         <main className="flex-1 min-h-0 flex flex-col overflow-hidden">
           {/* Search + Sort */}
-          <div className="p-4 pb-2 space-y-2">
+          <div className="p-3 md:p-4 pb-2 space-y-2">
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="🔍  Search products..."
               className="w-full bg-white border-2 border-gray-200 rounded-xl px-4 py-3 text-base text-gray-900 focus:outline-none focus:border-emerald-400"
             />
-            <div className="flex gap-2 flex-wrap">
+            <div className="flex gap-2 flex-nowrap overflow-x-auto pb-1">
               {([
                 { key: "default",   label: "Default" },
                 { key: "low-stock", label: "🟡 Low Stock" },
@@ -173,7 +233,7 @@ export default function InventoryPage() {
                 <button
                   key={s.key}
                   onClick={() => setSort(s.key)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all active:scale-95 ${
+                  className={`shrink-0 px-3 py-1.5 rounded-xl text-xs font-bold transition-all active:scale-95 ${
                     sort === s.key
                       ? "bg-emerald-500 text-white"
                       : "bg-white text-gray-500 border border-gray-200 hover:bg-gray-50"
@@ -185,7 +245,7 @@ export default function InventoryPage() {
               {lowStockCount > 0 && (
                 <Link
                   href="/stocks"
-                  className="ml-auto px-3 py-1.5 rounded-xl text-xs font-bold bg-red-50 text-red-500 border border-red-100 hover:bg-red-100 transition-all"
+                  className="shrink-0 ml-auto px-3 py-1.5 rounded-xl text-xs font-bold bg-red-50 text-red-500 border border-red-100 hover:bg-red-100 transition-all"
                 >
                   ⚠️ {lowStockCount} alert{lowStockCount !== 1 ? "s" : ""} →
                 </Link>
@@ -193,8 +253,8 @@ export default function InventoryPage() {
             </div>
           </div>
 
-          {/* Product Table */}
-          <div className="flex-1 overflow-y-auto px-4 pb-4">
+          {/* Product List */}
+          <div className="flex-1 overflow-y-auto px-3 md:px-4 pb-4">
             {filtered.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full text-gray-300 gap-3">
                 <span className="text-6xl">📭</span>
@@ -207,77 +267,110 @@ export default function InventoryPage() {
                 </button>
               </div>
             ) : (
-              <div className="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100">
-                {/* Table Header */}
-                <div className="grid grid-cols-[2fr_1fr_80px_90px_90px_160px] px-5 py-3 bg-gray-50 border-b border-gray-100">
-                  <span className="text-xs font-bold text-gray-400 uppercase tracking-wide">Product</span>
-                  <span className="text-xs font-bold text-gray-400 uppercase tracking-wide">Category</span>
-                  <span className="text-xs font-bold text-gray-400 uppercase tracking-wide text-right">Stock</span>
-                  <span className="text-xs font-bold text-gray-400 uppercase tracking-wide text-right">COGS</span>
-                  <span className="text-xs font-bold text-gray-400 uppercase tracking-wide text-right">SRP</span>
-                  <span className="text-xs font-bold text-gray-400 uppercase tracking-wide text-center">Actions</span>
+              <>
+                {/* Mobile: Card layout */}
+                <div className="md:hidden space-y-2">
+                  {filtered.map((product) => {
+                    const status = getStockStatus(product);
+                    return (
+                      <div
+                        key={product.id}
+                        className="bg-white rounded-2xl shadow-sm border border-gray-100 px-4 py-3"
+                      >
+                        <div className="flex items-center gap-3">
+                          <span className="text-3xl">{product.emoji}</span>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-semibold text-gray-800 truncate">{product.name}</p>
+                            <p className="text-xs text-gray-500">
+                              {getCategoryEmoji(product.categoryId)} {getCategoryName(product.categoryId)}
+                            </p>
+                          </div>
+                          <div className="text-right shrink-0">
+                            <p className="font-bold text-emerald-600">₱{product.price.toFixed(2)}</p>
+                            <p className={`text-xs font-bold ${status === "out" ? "text-red-500" : status === "low" ? "text-amber-500" : "text-gray-400"}`}>
+                              Stock: {product.stock ?? 0}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex gap-2 mt-3">
+                          <button
+                            onClick={() => setEditProduct(product)}
+                            className="flex-1 py-2 rounded-xl bg-gray-100 text-gray-600 text-sm font-semibold hover:bg-emerald-50 hover:text-emerald-600 active:scale-95 transition-all"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => setConfirmDelete({ type: "product", id: product.id, name: product.name })}
+                            className="flex-1 py-2 rounded-xl bg-gray-100 text-gray-500 text-sm font-semibold hover:bg-red-50 hover:text-red-500 active:scale-95 transition-all"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
 
-                {filtered.map((product, idx) => (
-                  <div
-                    key={product.id}
-                    className={`grid grid-cols-[2fr_1fr_80px_90px_90px_160px] items-center px-5 py-4 ${
-                      idx < filtered.length - 1 ? "border-b border-gray-50" : ""
-                    } hover:bg-gray-50 transition-colors`}
-                  >
-                    {/* Product Name */}
-                    <div className="flex items-center gap-3 min-w-0">
-                      <span className="text-2xl">{product.emoji}</span>
-                      <span className="font-semibold text-gray-800 truncate">{product.name}</span>
-                    </div>
-
-                    {/* Category */}
-                    <div className="flex items-center gap-1 min-w-0">
-                      <span>{getCategoryEmoji(product.categoryId)}</span>
-                      <span className="text-sm text-gray-500 truncate">{getCategoryName(product.categoryId)}</span>
-                    </div>
-
-                    {/* Stock */}
-                    <div className="text-right">
-                      <span className={`font-bold text-sm ${product.stock <= 5 ? "text-red-500" : product.stock <= 15 ? "text-amber-500" : "text-gray-700"}`}>
-                        {product.stock ?? 0}
-                      </span>
-                    </div>
-
-                    {/* COGS */}
-                    <div className="text-right">
-                      <span className="text-sm text-gray-500 font-medium">₱{(product.cogs ?? 0).toFixed(2)}</span>
-                    </div>
-
-                    {/* SRP */}
-                    <div className="text-right">
-                      <span className="font-bold text-emerald-600 text-sm">₱{product.price.toFixed(2)}</span>
-                    </div>
-
-                    {/* Actions */}
-                    <div className="flex gap-2 justify-center">
-                      <button
-                        onClick={() => setEditProduct(product)}
-                        className="px-3 py-2 rounded-xl bg-gray-100 text-gray-600 text-sm font-semibold hover:bg-emerald-50 hover:text-emerald-600 active:scale-95 transition-all"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => setConfirmDelete({ type: "product", id: product.id, name: product.name })}
-                        className="px-3 py-2 rounded-xl bg-gray-100 text-gray-500 text-sm font-semibold hover:bg-red-50 hover:text-red-500 active:scale-95 transition-all"
-                      >
-                        Delete
-                      </button>
-                    </div>
+                {/* Desktop: Table layout */}
+                <div className="hidden md:block bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100">
+                  <div className="grid grid-cols-[2fr_1fr_80px_90px_90px_160px] px-5 py-3 bg-gray-50 border-b border-gray-100">
+                    <span className="text-xs font-bold text-gray-400 uppercase tracking-wide">Product</span>
+                    <span className="text-xs font-bold text-gray-400 uppercase tracking-wide">Category</span>
+                    <span className="text-xs font-bold text-gray-400 uppercase tracking-wide text-right">Stock</span>
+                    <span className="text-xs font-bold text-gray-400 uppercase tracking-wide text-right">COGS</span>
+                    <span className="text-xs font-bold text-gray-400 uppercase tracking-wide text-right">SRP</span>
+                    <span className="text-xs font-bold text-gray-400 uppercase tracking-wide text-center">Actions</span>
                   </div>
-                ))}
-              </div>
+
+                  {filtered.map((product, idx) => (
+                    <div
+                      key={product.id}
+                      className={`grid grid-cols-[2fr_1fr_80px_90px_90px_160px] items-center px-5 py-4 ${
+                        idx < filtered.length - 1 ? "border-b border-gray-50" : ""
+                      } hover:bg-gray-50 transition-colors`}
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <span className="text-2xl">{product.emoji}</span>
+                        <span className="font-semibold text-gray-800 truncate">{product.name}</span>
+                      </div>
+                      <div className="flex items-center gap-1 min-w-0">
+                        <span>{getCategoryEmoji(product.categoryId)}</span>
+                        <span className="text-sm text-gray-500 truncate">{getCategoryName(product.categoryId)}</span>
+                      </div>
+                      <div className="text-right">
+                        <span className={`font-bold text-sm ${product.stock <= 5 ? "text-red-500" : product.stock <= 15 ? "text-amber-500" : "text-gray-700"}`}>
+                          {product.stock ?? 0}
+                        </span>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-sm text-gray-500 font-medium">₱{(product.cogs ?? 0).toFixed(2)}</span>
+                      </div>
+                      <div className="text-right">
+                        <span className="font-bold text-emerald-600 text-sm">₱{product.price.toFixed(2)}</span>
+                      </div>
+                      <div className="flex gap-2 justify-center">
+                        <button
+                          onClick={() => setEditProduct(product)}
+                          className="px-3 py-2 rounded-xl bg-gray-100 text-gray-600 text-sm font-semibold hover:bg-emerald-50 hover:text-emerald-600 active:scale-95 transition-all"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => setConfirmDelete({ type: "product", id: product.id, name: product.name })}
+                          className="px-3 py-2 rounded-xl bg-gray-100 text-gray-500 text-sm font-semibold hover:bg-red-50 hover:text-red-500 active:scale-95 transition-all"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </>
             )}
           </div>
         </main>
       </div>
 
-      {/* Product Form Modal */}
       {editProduct !== null && (
         <ProductFormModal
           product={editProduct === "new" ? null : editProduct}
@@ -287,7 +380,6 @@ export default function InventoryPage() {
         />
       )}
 
-      {/* Category Form Modal */}
       {editCategory !== null && (
         <CategoryFormModal
           category={editCategory === "new" ? null : editCategory}
@@ -296,7 +388,6 @@ export default function InventoryPage() {
         />
       )}
 
-      {/* Confirm Delete */}
       {confirmDelete && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
           <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm mx-4 p-6 text-center space-y-4">

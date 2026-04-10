@@ -11,12 +11,11 @@ interface Props {
 export default function ProductPopup({ category, products, onAddToCart, onClose }: Props) {
   return (
     <div
-      className="fixed inset-0 z-50 flex items-start justify-start"
+      className="fixed inset-0 z-50 flex md:items-start md:justify-start items-end justify-center"
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-2xl shadow-2xl mt-4 ml-4"
-        style={{ width: "min(95vw, 680px)" }}
+        className="bg-white md:rounded-2xl rounded-t-3xl shadow-2xl md:mt-4 md:ml-4 w-full md:max-w-[680px]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -34,24 +33,24 @@ export default function ProductPopup({ category, products, onAddToCart, onClose 
         </div>
 
         {/* Products Grid */}
-        <div className="grid grid-cols-5 gap-3 p-4 max-h-[80vh] overflow-y-auto">
+        <div className="grid grid-cols-3 md:grid-cols-5 gap-3 p-4 max-h-[55vh] md:max-h-[80vh] overflow-y-auto">
           {products.map((product) => (
             <button
               key={product.id}
               onClick={() => onAddToCart(product)}
               className="
                 flex flex-col items-center justify-center gap-2
-                rounded-2xl py-6 px-2 bg-gray-50 border border-gray-100
+                rounded-2xl py-5 px-2 bg-gray-50 border border-gray-100
                 hover:bg-emerald-50 hover:border-emerald-300
                 active:scale-95 active:bg-emerald-100
                 transition-all select-none shadow-sm
               "
             >
-              <span className="text-5xl">{product.emoji}</span>
-              <span className="text-sm font-semibold text-gray-700 text-center leading-tight">
+              <span className="text-4xl md:text-5xl">{product.emoji}</span>
+              <span className="text-xs md:text-sm font-semibold text-gray-700 text-center leading-tight">
                 {product.name}
               </span>
-              <span className="text-base font-bold text-emerald-600">
+              <span className="text-sm md:text-base font-bold text-emerald-600">
                 ₱{product.price}
               </span>
             </button>

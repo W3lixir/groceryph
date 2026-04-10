@@ -86,21 +86,22 @@ export default function TransactionsPage() {
   return (
     <div className="h-dvh bg-gray-100 flex flex-col overflow-hidden">
       {/* Header */}
-      <header className="bg-white shadow-sm px-6 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-3">
+      <header className="bg-white shadow-sm px-4 md:px-6 py-3 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 md:gap-3 min-w-0">
           <Link
             href="/"
-            className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-600 font-semibold text-sm px-4 py-2 rounded-xl transition-all active:scale-95"
+            className="flex items-center gap-1 md:gap-2 bg-gray-100 hover:bg-gray-200 text-gray-600 font-semibold text-sm px-3 md:px-4 py-2 rounded-xl transition-all active:scale-95 shrink-0"
           >
-            ← POS
+            ← <span className="hidden sm:inline">POS</span>
           </Link>
-          <div>
-            <h1 className="font-bold text-gray-800 text-lg leading-tight">🧾 Transactions</h1>
-            <p className="text-xs text-gray-400">{filtered.length} transaction{filtered.length !== 1 ? "s" : ""}</p>
+          <div className="min-w-0">
+            <h1 className="font-bold text-gray-800 text-base md:text-lg leading-tight">🧾 Transactions</h1>
+            <p className="text-xs text-gray-400 hidden sm:block">{filtered.length} transaction{filtered.length !== 1 ? "s" : ""}</p>
           </div>
         </div>
         <button
           onClick={() => {
+            if (!confirm("I-download ang transactions CSV?")) return;
             const rows = [
               ["Date", "Time", "Items", "Total", "Amount Paid", "Change"],
               ...filtered.map((t) => [
@@ -118,19 +119,19 @@ export default function TransactionsPage() {
             a.download = `transactions-${new Date().toISOString().slice(0, 10)}.csv`;
             a.click();
           }}
-          className="flex items-center gap-2 bg-green-50 hover:bg-green-100 text-green-700 border border-green-200 font-semibold text-sm px-4 py-2 rounded-xl transition-all active:scale-95"
+          className="flex items-center gap-1 md:gap-2 bg-green-50 hover:bg-green-100 text-green-700 border border-green-200 font-semibold text-sm px-3 md:px-4 py-2 rounded-xl transition-all active:scale-95 shrink-0"
         >
-          ⬇️ Download CSV
+          ⬇️ <span className="hidden sm:inline">Download CSV</span>
         </button>
       </header>
 
       {/* Filter Tabs */}
-      <div className="bg-white border-b border-gray-100 px-6 py-3 flex gap-2">
+      <div className="bg-white border-b border-gray-100 px-4 md:px-6 py-3 flex gap-2 overflow-x-auto">
         {FILTERS.map((f) => (
           <button
             key={f.key}
             onClick={() => setFilter(f.key)}
-            className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all active:scale-95 ${
+            className={`shrink-0 px-4 py-2 rounded-xl text-sm font-semibold transition-all active:scale-95 ${
               filter === f.key
                 ? "bg-emerald-500 text-white shadow-sm"
                 : "bg-gray-100 text-gray-600 hover:bg-gray-200"
@@ -142,25 +143,25 @@ export default function TransactionsPage() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-3 gap-4 px-6 py-4">
-        <div className="bg-white rounded-2xl shadow-sm p-4 border border-gray-100">
-          <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-1">Total Sales</p>
-          <p className="text-2xl font-bold text-emerald-600">₱{totalSales.toFixed(2)}</p>
+      <div className="grid grid-cols-3 gap-3 md:gap-4 px-4 md:px-6 py-3 md:py-4">
+        <div className="bg-white rounded-2xl shadow-sm p-3 md:p-4 border border-gray-100">
+          <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-1">Sales</p>
+          <p className="text-lg md:text-2xl font-bold text-emerald-600">₱{totalSales.toFixed(2)}</p>
         </div>
-        <div className="bg-white rounded-2xl shadow-sm p-4 border border-gray-100">
+        <div className="bg-white rounded-2xl shadow-sm p-3 md:p-4 border border-gray-100">
           <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-1">Transactions</p>
-          <p className="text-2xl font-bold text-gray-800">{filtered.length}</p>
+          <p className="text-lg md:text-2xl font-bold text-gray-800">{filtered.length}</p>
         </div>
-        <div className="bg-white rounded-2xl shadow-sm p-4 border border-gray-100">
+        <div className="bg-white rounded-2xl shadow-sm p-3 md:p-4 border border-gray-100">
           <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-1">Average</p>
-          <p className="text-2xl font-bold text-gray-800">
+          <p className="text-lg md:text-2xl font-bold text-gray-800">
             ₱{filtered.length > 0 ? (totalSales / filtered.length).toFixed(2) : "0.00"}
           </p>
         </div>
       </div>
 
       {/* Transaction List */}
-      <div className="flex-1 overflow-y-auto px-6 pb-6">
+      <div className="flex-1 overflow-y-auto px-4 md:px-6 pb-6">
         {filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-gray-300 gap-3">
             <span className="text-6xl">🧾</span>
@@ -170,19 +171,15 @@ export default function TransactionsPage() {
           <div className="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100">
             {filtered.map((txn, idx) => (
               <div key={txn.id}>
-                {/* Row */}
                 <button
                   onClick={() => setExpanded(expanded === txn.id ? null : txn.id)}
-                  className={`w-full text-left px-5 py-4 flex items-center gap-4 hover:bg-gray-50 transition-colors ${
+                  className={`w-full text-left px-4 md:px-5 py-4 flex items-center gap-3 md:gap-4 hover:bg-gray-50 transition-colors ${
                     idx < filtered.length - 1 ? "border-b border-gray-50" : ""
                   }`}
                 >
-                  {/* Icon */}
-                  <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-lg flex-shrink-0">
+                  <div className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-emerald-100 flex items-center justify-center text-base md:text-lg flex-shrink-0">
                     🧾
                   </div>
-
-                  {/* Info */}
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-gray-800 text-sm">
                       {txn.items.length} item{txn.items.length !== 1 ? "s" : ""}
@@ -196,22 +193,17 @@ export default function TransactionsPage() {
                       {formatDate(txn.timestamp)} · {formatTime(txn.timestamp)}
                     </p>
                   </div>
-
-                  {/* Amount */}
                   <div className="text-right flex-shrink-0">
                     <p className="font-bold text-emerald-600 text-base">₱{txn.total.toFixed(2)}</p>
-                    <p className="text-xs text-gray-400">Change: ₱{txn.change.toFixed(2)}</p>
+                    <p className="text-xs text-gray-400">Chng: ₱{txn.change.toFixed(2)}</p>
                   </div>
-
-                  {/* Expand chevron */}
-                  <span className={`text-gray-300 text-sm transition-transform ${expanded === txn.id ? "rotate-180" : ""}`}>
+                  <span className={`text-gray-300 text-sm transition-transform shrink-0 ${expanded === txn.id ? "rotate-180" : ""}`}>
                     ▼
                   </span>
                 </button>
 
-                {/* Expanded Details */}
                 {expanded === txn.id && (
-                  <div className="bg-gray-50 border-t border-gray-100 px-5 py-4 space-y-2">
+                  <div className="bg-gray-50 border-t border-gray-100 px-4 md:px-5 py-4 space-y-2">
                     {txn.items.map((item) => (
                       <div key={item.product.id} className="flex items-center justify-between text-sm">
                         <div className="flex items-center gap-2">
