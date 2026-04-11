@@ -98,7 +98,7 @@ export default function POSPage() {
         <div className="flex items-center gap-2 md:gap-3">
           <span className="text-2xl">🏪</span>
           <div className="hidden sm:block">
-            <h1 className="font-bold text-gray-800 text-lg leading-tight">My Grocery</h1>
+            <h1 className="font-bold text-gray-800 text-lg leading-tight">Grocery88</h1>
             <p className="text-xs text-gray-400">POS System</p>
           </div>
         </div>
