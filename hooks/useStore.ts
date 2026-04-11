@@ -23,6 +23,7 @@ function mapProduct(row: Record<string, unknown>): Product {
     stock: Number(row.stock ?? 0),
     reorderQty: Number(row.reorder_qty ?? 5),
     categoryId: row.category_id as string,
+    barcode: (row.barcode as string) || undefined,
   };
 }
 
@@ -135,6 +136,7 @@ export function useStore() {
       stock: p.stock,
       reorder_qty: p.reorderQty,
       category_id: p.categoryId,
+      barcode: p.barcode || null,
     };
 
     if (existing) {

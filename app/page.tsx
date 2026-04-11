@@ -10,6 +10,7 @@ import CategoryGrid from "@/components/CategoryGrid";
 import ProductPopup from "@/components/ProductPopup";
 import Cart from "@/components/Cart";
 import CheckoutModal from "@/components/CheckoutModal";
+import BarcodeScanner from "@/components/BarcodeScanner";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -22,6 +23,8 @@ export default function POSPage() {
   const [history, setHistory] = useState<CartItem[][]>([]);
   const [showCheckout, setShowCheckout] = useState(false);
   const [lastTxn, setLastTxn] = useState<{ total: number; change: number; mode: string } | null>(null);
+  const [showScanner, setShowScanner] = useState(false);
+  const [scanFeedback, setScanFeedback] = useState<{ msg: string; ok: boolean } | null>(null);
 
   const categoryProducts = activeCategory
     ? products.filter((p) => p.categoryId === activeCategory.id)
@@ -85,6 +88,19 @@ export default function POSPage() {
     setActiveCategory(null);
   };
 
+  const handleScan = (code: string) => {
+    setShowScanner(false);
+    const product = products.find((p) => p.barcode === code);
+    if (!product) {
+      setScanFeedback({ msg: `Barcode ${code} not found. Assign it in Inventory → Edit Product.`, ok: false });
+      setTimeout(() => setScanFeedback(null), 4000);
+      return;
+    }
+    addToCart(product);
+    setScanFeedback({ msg: `Added: ${product.emoji} ${product.name}`, ok: true });
+    setTimeout(() => setScanFeedback(null), 2500);
+  };
+
   const total = cart.reduce((s, i) => s + i.product.price * i.qty, 0);
 
   const now = new Date();
@@ -107,6 +123,12 @@ export default function POSPage() {
             <p className="text-sm font-bold text-gray-700">{timeStr}</p>
             <p className="text-xs text-gray-400">{dateStr}</p>
           </div>
+          <button
+            onClick={() => setShowScanner(true)}
+            className="flex items-center gap-1 md:gap-2 bg-gray-800 hover:bg-gray-700 text-white font-semibold text-sm px-3 md:px-4 py-2 rounded-xl transition-all active:scale-95"
+          >
+            📷 <span className="hidden sm:inline">Scan</span>
+          </button>
           <Link
             href="/transactions"
             className="flex items-center gap-1 md:gap-2 bg-gray-100 hover:bg-gray-200 text-gray-600 font-semibold text-sm px-3 md:px-4 py-2 rounded-xl transition-all active:scale-95"
@@ -149,6 +171,17 @@ export default function POSPage() {
           >
             ✕
           </button>
+        </div>
+      )}
+
+      {/* Scan Feedback Banner */}
+      {scanFeedback && (
+        <div className={`px-4 md:px-6 py-3 flex items-center justify-between ${scanFeedback.ok ? "bg-emerald-500 text-white" : "bg-red-500 text-white"}`}>
+          <div className="flex items-center gap-2">
+            <span className="text-xl">{scanFeedback.ok ? "✅" : "❌"}</span>
+            <span className="font-semibold text-sm md:text-base">{scanFeedback.msg}</span>
+          </div>
+          <button onClick={() => setScanFeedback(null)} className="opacity-70 hover:opacity-100 text-xl font-bold">✕</button>
         </div>
       )}
 
@@ -197,6 +230,14 @@ export default function POSPage() {
           total={total}
           onConfirm={handleCheckout}
           onClose={() => setShowCheckout(false)}
+        />
+      )}
+
+      {/* Barcode Scanner */}
+      {showScanner && (
+        <BarcodeScanner
+          onScan={handleScan}
+          onClose={() => setShowScanner(false)}
         />
       )}
     </div>

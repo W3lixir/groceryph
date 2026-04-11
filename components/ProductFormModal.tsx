@@ -33,6 +33,7 @@ export default function ProductFormModal({ product, categories, onSave, onClose 
   const [categoryId, setCategoryId] = useState(categories[0]?.id ?? "");
   const [emoji, setEmoji] = useState("🛒");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [barcode, setBarcode] = useState("");
 
   useEffect(() => {
     if (product) {
@@ -43,6 +44,7 @@ export default function ProductFormModal({ product, categories, onSave, onClose 
       setReorderQty((product.reorderQty ?? 5).toString());
       setCategoryId(product.categoryId);
       setEmoji(product.emoji);
+      setBarcode(product.barcode ?? "");
     } else {
       setName("");
       setPrice("");
@@ -51,6 +53,7 @@ export default function ProductFormModal({ product, categories, onSave, onClose 
       setReorderQty("5");
       setCategoryId(categories[0]?.id ?? "");
       setEmoji("🛒");
+      setBarcode("");
     }
   }, [product, categories]);
 
@@ -65,6 +68,7 @@ export default function ProductFormModal({ product, categories, onSave, onClose 
       reorderQty: parseInt(reorderQty) || 5,
       categoryId,
       emoji,
+      barcode: barcode.trim() || undefined,
     });
   };
 
@@ -191,6 +195,18 @@ export default function ProductFormModal({ product, categories, onSave, onClose 
                 </option>
               ))}
             </select>
+          </div>
+
+          {/* Barcode */}
+          <div>
+            <label className="text-sm font-semibold text-gray-900 block mb-1">Barcode (optional)</label>
+            <input
+              value={barcode}
+              onChange={(e) => setBarcode(e.target.value)}
+              placeholder="e.g. 4800016510093"
+              className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-emerald-400 font-mono tracking-widest"
+            />
+            <p className="text-xs text-gray-400 mt-1">Scan or type the EAN/UPC barcode on the packaging</p>
           </div>
 
           {/* Buttons */}

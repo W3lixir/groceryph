@@ -8,6 +8,7 @@ export interface Product {
   categoryId: string;
   emoji: string;
   image?: string;
+  barcode?: string;   // EAN/UPC barcode for scanner lookup
 }
 
 export type StockStatus = "out" | "low" | "ok";
