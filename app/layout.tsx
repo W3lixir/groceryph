@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "My Grocery POS",
+  title: "Grocery88 POS",
   description: "Local grocery point-of-sale system",
 };
 
